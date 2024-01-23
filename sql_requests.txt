@@ -1,0 +1,54 @@
+create table Students(
+   id int NOT NULL,
+    zalik int not null unique,
+    student_name char(60) not null,
+    age int,
+    facult_id int not null,
+    constraint fk_facult_id
+                     foreign key (facult_id) references Facultety(id)
+                     on delete restrict
+                     on update restrict
+   );
+
+create table Facultety(
+    id int not null primary key,
+    name_facultetu char(120) not  null
+);
+
+create table Subjects(
+  id int not null primary key,
+  name_subject char(60) not null
+);
+
+create table Marks(
+   id int not null  primary key auto_increment,
+   stdnt_id int not null,
+    constraint fk_stdnt_id
+                  foreign key (stdnt_id) references Students(zalik)
+                  on delete restrict
+                  on update restrict,
+    subj_id int not null,
+    constraint fk_subj_id
+                  foreign key (subj_id) references subjects(id)
+                  on delete restrict
+                  on update restrict
+);
+insert into Students (id, zalik, student_name, age, facult_id) VALUES (1, 12001, 'Захар', 19, 125);
+insert into Students (id, zalik, student_name, age, facult_id) VALUES (2, 12002, 'Микита', 23, 122);
+insert into Students (id, zalik, student_name, age, facult_id) VALUES (3, 12003, 'Олег', 20, 121);
+insert into Students (id, zalik, student_name, age, facult_id) VALUES (4, 12004, 'Павло', 21, 124);
+
+insert into Facultety(id, name_facultetu) values (125, 'Кібербезпека');
+insert into Facultety(id, name_facultetu) values (121, 'Інженерія програмного забезпечення');
+insert into Facultety(id, name_facultetu) values (122, 'Комп/ютерні науки');
+insert into Facultety(id, name_facultetu) values (124, 'Системний аналіз');
+
+insert into Subjects(id, name_subject) VALUES (1, 'Математика');
+insert into Subjects(id, name_subject) VALUES (2, 'Кібернетика');
+insert into Subjects(id, name_subject) VALUES (3, 'Програмування');
+insert into Subjects(id, name_subject) VALUES (4, 'ООП');
+
+insert into Marks(stdnt_id, subj_id, mark) VALUES (12001, 1, 95);
+insert into Marks(stdnt_id, subj_id, mark) VALUES (12002, 4, 90);
+insert into Marks(stdnt_id, subj_id, mark) VALUES (12003, 3, 70);
+insert into Marks(stdnt_id, subj_id, mark) VALUES (12004, 2, 87);
