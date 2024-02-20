@@ -1,15 +1,13 @@
 <?php
-function  GetConnection()
+function  GetPDO(): PDO
 {
     $host = 'localhost';
     $username = 'root';
     $password = '';
     $dbname = 'mainDb';
-    $connect = mysqli_connect($host, $username, $password, $dbname);
-    if($connect->connect_error){
-        die("Connection failed" . $connect->connect_error);
-    }
-    return $connect;
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    return $pdo;
 }
 
 function showSomething($something)
@@ -19,60 +17,47 @@ function showSomething($something)
     echo '</pre>';
     die();
 }
-function getAllMessages($connect): array
+function getAllMessages(PDO $pdo): array
 {
     $data = [];
     $sql = "SELECT * FROM Messages";
-    $result = $connect->query($sql);
-    while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
+    $stmt = $pdo->query($sql);
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC))
     {
         $data[] = $row;
     }
     return $data;
 }
 
-function addNewMessage($connect, $name, $message)
+function addNewMessage(PDO $pdo, $name, $message)
 {
-    $getUserId = "SELECT id FROM Users WHERE username = \"$name\"";
-    $id = $connect->query($getUserId);
-    if ($id && $id->num_rows > 0) {
-        $row = $id->fetch_assoc();
-        $user_id = $row['id'];
-    }
-$sql = "INSERT INTO Messages(name, message, user_id) VALUES (\"$name\", \"$message\", '$user_id')";
-if(mysqli_query($connect, $sql)){
-        echo "New record successfuly created";
-    }
+    $getUserId = "SELECT id FROM Users WHERE username = ?";
+    $stmt = $pdo->prepare($getUserId);
+    $stmt->execute([$name]);
+    $user_id = $stmt->fetchColumn();
+    $sql = "INSERT INTO Messages(name, message, user_id) VALUES (?, ?, ?)";
+    $stmt = $pdo->prepare($sql);
+    if($stmt->execute([$name, $message, $user_id])){
+            echo "New record successfuly created";
+        } else {
+            echo "Error creating new record";
+        }
 }
 
-function addNewUser($connect, $username, $password)
+function addNewUser(PDO $pdo, $username, $password)
 {
-    $sql = "INSERT INTO Users(username, password) VALUES (\"$username\", \"$password\")";
-    if(mysqli_query($connect, $sql)){
+    $sql = "INSERT INTO Users(username, password) VALUES (?, ?)";
+    $stmt = $pdo->prepare($sql);
+    if($stmt->execute([$username, $password])){
         echo "New user is added";
     } else{ echo "Something is wrong";}
 }
 
-/*function checkUserCredentials($connect, $username, $password): array
+function checkUserCredentials(PDO $pdo, $username, $password): bool
 {
-
-    $data = [];
-    $sql = "SELECT * FROM Users WHERE username = \"$username\" AND password = \"$password\"";
-    $result = $connect->query($sql);
-    while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
-    {
-        $data[] = $row;
-    }
-    return $data;
-
-}*/
-function checkUserCredentials($connect, $username, $password): bool
-{
-    $sql = "SELECT * FROM Users WHERE username = '$username' AND password = '$password'";
-    $result = $connect->query($sql);
-    if (mysqli_num_rows($result) > 0) {
-        return true; // Якщо користувач існує, повертаємо true
-    } else {
-        return false; // Якщо користувача не знайдено, повертаємо false
-    }
+    $sql = "SELECT * FROM Users WHERE username = ? AND password = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$username, $password]);
+    $count = $stmt->fetchColumn();
+    return $count > 0;
 }
