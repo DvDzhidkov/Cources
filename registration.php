@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 require_once('DB.php');
-$connect = GetConnection();
+$connect = GetPDO();
 
 $username = $_POST['username'];
 $password = $_POST['password'];
@@ -17,7 +17,7 @@ if (!empty($_POST['username']) && !empty($_POST['password'])){
 
     echo 'Redirect is not active.';
 }
-mysqli_close($connect);
+$connect = null;
 ?>
 <html lang="en">
 <head>
