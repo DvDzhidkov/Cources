@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <?php
 require_once('DB.php');
-$connect = GetConnection();
+$connect = GetPDO();
 
 echo "<br>";
 
-mysqli_close($connect);
+$connect = null;
 ?>
 
 <html lang="en">
